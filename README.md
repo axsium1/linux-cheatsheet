@@ -7,7 +7,7 @@
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)
 
 ## 🌐 Live Site
-[View Cheatsheet →](https://axsium.github.io/linux-cheatsheet)
+[View Cheatsheet →](https://axsium1.github.io/linux-cheatsheet/)
 
 ---
 
