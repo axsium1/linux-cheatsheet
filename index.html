@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linux Commands Cheatsheet</title>
+  <meta name="description" content="Quick reference for Linux commands. Search, filter, and copy CLI commands grouped by category.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0d;
+      --surface: #171717;
+      --surface-hover: #1f1f1f;
+      --border: #2a2a2a;
+      --text: #e8e4df;
+      --text-muted: #7a756f;
+      --accent: #c9956b;
+      --accent-hover: #d4a57b;
+      --accent-soft: rgba(201, 149, 107, 0.08);
+      --code-bg: #111113;
+      --cat-navigation: #6ba3c9;
+      --cat-files: #c9a36b;
+      --cat-viewing: #8bc96b;
+      --cat-text: #c96b8a;
+      --cat-permissions: #c96b6b;
+      --cat-process: #a06bc9;
+      --cat-disk: #6bc9b8;
+      --cat-network: #c9c56b;
+      --cat-ssh: #6b8ac9;
+      --cat-system: #c98a6b;
+      --cat-archive: #8a6bc9;
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-code: 'JetBrains Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 60px 20px 30px;
+    }
+
+    .hero h1 {
+      font-family: var(--font-code);
+      font-weight: 700;
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      color: var(--accent);
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .hero h1 .cursor {
+      display: inline-block;
+      width: 3px;
+      height: 1em;
+      background: var(--accent);
+      margin-left: 4px;
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .hero .subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+
+    .search-wrapper {
+      position: relative;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .search-wrapper input {
+      width: 100%;
+      padding: 14px 48px 14px 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .search-wrapper input::placeholder { color: var(--text-muted); }
+
+    .search-wrapper input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .search-wrapper .kbd {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 3px 8px;
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      pointer-events: none;
+      transition: opacity 0.15s;
+    }
+
+    .search-wrapper input:focus ~ .kbd { opacity: 0; }
+
+    /* Categories */
+    .categories {
+      display: flex;
+      gap: 8px;
+      padding: 16px 20px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--bg);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .categories::-webkit-scrollbar { height: 4px; }
+    .categories::-webkit-scrollbar-track { background: transparent; }
+    .categories::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .cat-btn {
+      padding: 7px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .cat-btn:hover { background: var(--surface-hover); color: var(--text); }
+
+    .cat-btn.active {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 16px;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+      opacity: 1;
+    }
+
+    .card.hidden {
+      display: none;
+    }
+
+    .card.fade-in {
+      animation: cardIn 0.2s ease forwards;
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-titlebar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      background: var(--code-bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dots {
+      display: flex;
+      gap: 5px;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--border);
+      display: block;
+    }
+
+    .dot:first-child { background: var(--cat-color, var(--accent)); }
+
+    .card-category {
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .card-body {
+      padding: 16px;
+    }
+
+    .cmd-name {
+      font-family: var(--font-code);
+      font-size: 1.3rem;
+      font-weight: 500;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .cmd-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .cmd-syntax {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      font-family: var(--font-code);
+      font-size: 0.82rem;
+      color: var(--text);
+      overflow-x: auto;
+    }
+
+    .cmd-syntax .prompt { color: var(--accent); margin-right: 6px; }
+
+    .cmd-example {
+      position: relative;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-family: var(--font-code);
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      overflow-x: auto;
+    }
+
+    .example-label {
+      display: block;
+      font-family: var(--font-body);
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      opacity: 0.7;
+    }
+
+    .cmd-example .prompt { color: var(--text-muted); margin-right: 6px; }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 4px 8px;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.15s, color 0.15s;
+    }
+
+    .cmd-example:hover .copy-btn { opacity: 1; }
+    .copy-btn:hover { color: var(--accent); }
+    .copy-btn.copied { color: var(--cat-viewing); }
+
+    /* No results */
+    .no-results {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    .no-results span { font-size: 2rem; display: block; margin-bottom: 12px; }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--border);
+      margin-top: 20px;
+    }
+
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* Count badge */
+    .count-badge {
+      font-family: var(--font-code);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 0 20px 4px;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .hero { padding: 40px 16px 20px; }
+      .hero h1 { font-size: 2.2rem; }
+      .hero .subtitle { font-size: 0.95rem; }
+      .categories {
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        padding: 12px 16px;
+      }
+      .cat-btn { padding: 6px 12px; font-size: 0.78rem; }
+      .grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 12px 16px;
+      }
+    }
+
+    @media (min-width: 641px) and (max-width: 1024px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (min-width: 1025px) {
+      .categories { flex-wrap: wrap; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .hero h1 .cursor { animation: none; opacity: 1; }
+    }
+
+    /* Highlight */
+    mark {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 2px;
+      padding: 0 2px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <h1>$ cheat<span class="cursor"></span></h1>
+    <p class="subtitle">Linux commands you forget, always at hand</p>
+    <div class="search-wrapper">
+      <input type="text" id="search" placeholder="Search commands..." autocomplete="off" spellcheck="false">
+      <kbd class="kbd">/</kbd>
+    </div>
+  </header>
+
+  <nav class="categories" id="categories"></nav>
+  <div class="count-badge" id="count-badge"></div>
+
+  <main class="grid" id="grid"></main>
+
+  <footer>
+    <p>Linux Cheatsheet &mdash; open source reference for developers &amp; sysadmins</p>
+  </footer>
+
+  <script>
+    const CATEGORY_META = {
+      navigation:     { label: 'Navigation',        color: 'var(--cat-navigation)' },
+      files:          { label: 'Files & Dirs',      color: 'var(--cat-files)' },
+      viewing:        { label: 'Viewing Files',     color: 'var(--cat-viewing)' },
+      text:           { label: 'Text Processing',   color: 'var(--cat-text)' },
+      permissions:    { label: 'Permissions',       color: 'var(--cat-permissions)' },
+      process:        { label: 'Process Mgmt',      color: 'var(--cat-process)' },
+      disk:           { label: 'Disk & Storage',    color: 'var(--cat-disk)' },
+      network:        { label: 'Network',           color: 'var(--cat-network)' },
+      ssh:            { label: 'SSH & Remote',      color: 'var(--cat-ssh)' },
+      system:         { label: 'System Info',       color: 'var(--cat-system)' },
+      archive:        { label: 'Archive',           color: 'var(--cat-archive)' }
+    };
+
+    const commands = [
+      // Navigation
+      { name: 'pwd', category: 'navigation', syntax: 'pwd', description: 'Print name of current working directory', example: 'pwd\n/home/user/projects' },
+      { name: 'ls', category: 'navigation', syntax: 'ls [options] [path]', description: 'List directory contents', example: 'ls -la /home/user' },
+      { name: 'cd', category: 'navigation', syntax: 'cd [directory]', description: 'Change the working directory', example: 'cd /var/log\ncd ~\ncd ..' },
+      { name: 'tree', category: 'navigation', syntax: 'tree [options] [directory]', description: 'Display directory structure as a tree', example: 'tree -L 2 /home/user' },
+
+      // Files & Dirs
+      { name: 'cp', category: 'files', syntax: 'cp [options] source dest', description: 'Copy files or directories', example: 'cp -r src/ backup/\ncp file.txt file_backup.txt' },
+      { name: 'mv', category: 'files', syntax: 'mv [options] source dest', description: 'Move or rename files and directories', example: 'mv old.txt new.txt\nmv file.txt /tmp/' },
+      { name: 'rm', category: 'files', syntax: 'rm [options] file...', description: 'Remove files or directories', example: 'rm -rf temp/\nrm unwanted.log' },
+      { name: 'mkdir', category: 'files', syntax: 'mkdir [options] directory...', description: 'Create new directories', example: 'mkdir -p project/src/utils' },
+      { name: 'rmdir', category: 'files', syntax: 'rmdir [options] directory...', description: 'Remove empty directories', example: 'rmdir empty_folder' },
+      { name: 'touch', category: 'files', syntax: 'touch [options] file...', description: 'Create empty files or update timestamps', example: 'touch newfile.txt\ntouch -t 202501011200 file.txt' },
+      { name: 'find', category: 'files', syntax: 'find [path] [expression]', description: 'Search for files in a directory hierarchy', example: 'find . -name "*.py"\nfind /var -size +100M' },
+      { name: 'locate', category: 'files', syntax: 'locate [pattern]', description: 'Find files by name using a database', example: 'locate nginx.conf' },
+      { name: 'ln', category: 'files', syntax: 'ln [options] target link_name', description: 'Create links between files', example: 'ln -s /etc/nginx/nginx.conf ~/nginx.conf' },
+
+      // Viewing Files
+      { name: 'cat', category: 'viewing', syntax: 'cat [options] [file...]', description: 'Concatenate and display file contents', example: 'cat /etc/hosts\ncat file1.txt file2.txt' },
+      { name: 'less', category: 'viewing', syntax: 'less [options] [file]', description: 'View file contents page by page', example: 'less /var/log/syslog' },
+      { name: 'head', category: 'viewing', syntax: 'head [options] [file]', description: 'Output the first lines of a file', example: 'head -n 20 access.log' },
+      { name: 'tail', category: 'viewing', syntax: 'tail [options] [file]', description: 'Output the last lines of a file', example: 'tail -f /var/log/syslog\ntail -n 50 error.log' },
+      { name: 'wc', category: 'viewing', syntax: 'wc [options] [file...]', description: 'Word, line, character, and byte count', example: 'wc -l *.txt' },
+      { name: 'grep', category: 'viewing', syntax: 'grep [options] pattern [file...]', description: 'Search text using regular expressions', example: 'grep -rn "TODO" src/\ngrep -i "error" logfile.txt' },
+      { name: 'file', category: 'viewing', syntax: 'file [options] [file...]', description: 'Determine file type', example: 'file image.png\nfile --mime-type document.pdf' },
+
+      // Text Processing
+      { name: 'sort', category: 'text', syntax: 'sort [options] [file...]', description: 'Sort lines of text files', example: 'sort -n numbers.txt\nsort -u names.txt' },
+      { name: 'uniq', category: 'text', syntax: 'uniq [options] [input [output]]', description: 'Filter duplicate lines from sorted input', example: 'sort file.txt | uniq -c' },
+      { name: 'cut', category: 'text', syntax: 'cut [options] [file...]', description: 'Remove sections from each line of files', example: 'cut -d: -f1 /etc/passwd\ncut -c1-10 file.txt' },
+      { name: 'awk', category: 'text', syntax: 'awk [options] \'program\' [file...]', description: 'Pattern scanning and processing language', example: 'awk \'NR==5\' file.txt\nawk -F: \'{print $1}\' /etc/passwd' },
+      { name: 'sed', category: 'text', syntax: 'sed [options] \'command\' [file...]', description: 'Stream editor for filtering and transforming text', example: 'sed -i \'s/old/new/g\' file.txt\nsed -n \'1,10p\' file.txt' },
+
+      // Permissions
+      { name: 'chmod', category: 'permissions', syntax: 'chmod [options] mode file...', description: 'Change file access permissions', example: 'chmod 755 script.sh\nchmod +x deploy.sh' },
+      { name: 'chown', category: 'permissions', syntax: 'chown [options] owner[:group] file...', description: 'Change file owner and group', example: 'chown www-data:www-data /var/www -R' },
+      { name: 'chgrp', category: 'permissions', syntax: 'chgrp [options] group file...', description: 'Change group ownership of files', example: 'chgrp developers /project' },
+      { name: 'umask', category: 'permissions', syntax: 'umask [mask]', description: 'Set or display the file mode creation mask', example: 'umask 022\numask -S' },
+
+      // Process Management
+      { name: 'ps', category: 'process', syntax: 'ps [options]', description: 'Report a snapshot of current processes', example: 'ps aux\nps -ef | grep nginx' },
+      { name: 'top', category: 'process', syntax: 'top', description: 'Display and update sorted process information', example: 'top\n(top interactively — press q to quit)' },
+      { name: 'htop', category: 'process', syntax: 'htop', description: 'Interactive process viewer (enhanced top)', example: 'htop' },
+      { name: 'kill', category: 'process', syntax: 'kill [options] pid...', description: 'Send signals to processes', example: 'kill -9 1234\nkill -TERM 5678' },
+      { name: 'bg', category: 'process', syntax: 'bg [job_spec]', description: 'Resume suspended jobs in the background', example: 'bg %1' },
+      { name: 'fg', category: 'process', syntax: 'fg [job_spec]', description: 'Bring background jobs to the foreground', example: 'fg %2' },
+      { name: 'nohup', category: 'process', syntax: 'nohup command [args]', description: 'Run command immune to hangups', example: 'nohup ./server.sh > server.log 2>&1 &' },
+
+      // Disk & Storage
+      { name: 'df', category: 'disk', syntax: 'df [options] [file...]', description: 'Report disk space usage', example: 'df -h\ndf -h /home' },
+      { name: 'du', category: 'disk', syntax: 'du [options] [file...]', description: 'Estimate file space usage', example: 'du -sh *\ndu -h --max-depth=1' },
+      { name: 'mount', category: 'disk', syntax: 'mount [options] device mountpoint', description: 'Mount a filesystem', example: 'mount /dev/sdb1 /mnt/usb' },
+      { name: 'fdisk', category: 'disk', syntax: 'fdisk [options] device', description: 'Partition table manipulator', example: 'sudo fdisk -l' },
+      { name: 'lsblk', category: 'disk', syntax: 'lsblk [options] [device]', description: 'List block devices', example: 'lsblk -f' },
+
+      // Network
+      { name: 'ping', category: 'network', syntax: 'ping [options] host', description: 'Send ICMP echo requests to test connectivity', example: 'ping -c 4 8.8.8.8' },
+      { name: 'curl', category: 'network', syntax: 'curl [options] [url]', description: 'Transfer data from or to a server', example: 'curl -s https://api.example.com/data\ncurl -X POST -d \'{"a":1}\' url' },
+      { name: 'wget', category: 'network', syntax: 'wget [options] [url]', description: 'Download files from the web', example: 'wget https://example.com/file.zip\nwget -c -r https://example.com' },
+      { name: 'ss', category: 'network', syntax: 'ss [options] [filter]', description: 'Socket statistics (replaces netstat)', example: 'ss -tlnp\nss -u state established' },
+      { name: 'ip', category: 'network', syntax: 'ip [options] object command', description: 'Show/manipulate routing, devices, and addresses', example: 'ip addr show\nip route show' },
+      { name: 'traceroute', category: 'network', syntax: 'traceroute [options] host', description: 'Trace the route to a network host', example: 'traceroute google.com' },
+      { name: 'dig', category: 'network', syntax: 'dig [options] host', description: 'DNS lookup utility', example: 'dig example.com\ndig +short example.com MX' },
+
+      // SSH & Remote
+      { name: 'ssh', category: 'ssh', syntax: 'ssh [options] [user@]hostname [command]', description: 'Open a secure shell session', example: 'ssh user@192.168.1.100\nssh -i ~/.ssh/mykey.pem ec2-user@host' },
+      { name: 'scp', category: 'ssh', syntax: 'scp [options] source dest', description: 'Securely copy files between hosts', example: 'scp file.txt user@host:/tmp/\nscp -r dir/ user@host:~/' },
+      { name: 'rsync', category: 'ssh', syntax: 'rsync [options] source dest', description: 'Synchronize files and directories efficiently', example: 'rsync -avz src/ user@host:/dest/\nrsync --delete -r src/ dest/' },
+      { name: 'ssh-keygen', category: 'ssh', syntax: 'ssh-keygen [options]', description: 'Generate and manage SSH key pairs', example: 'ssh-keygen -t ed25519 -C "user@example.com"' },
+
+      // System Info
+      { name: 'uname', category: 'system', syntax: 'uname [options]', description: 'Print system information', example: 'uname -a\nuname -r' },
+      { name: 'whoami', category: 'system', syntax: 'whoami', description: 'Print current effective username', example: 'whoami' },
+      { name: 'id', category: 'system', syntax: 'id [user]', description: 'Print real and effective user and group IDs', example: 'id\nid www-data' },
+      { name: 'uptime', category: 'system', syntax: 'uptime', description: 'Show how long the system has been running', example: 'uptime' },
+      { name: 'free', category: 'system', syntax: 'free [options]', description: 'Display memory usage', example: 'free -h' },
+      { name: 'lscpu', category: 'system', syntax: 'lscpu', description: 'Display CPU architecture information', example: 'lscpu' },
+
+      // Archive
+      { name: 'tar', category: 'archive', syntax: 'tar [options] archive [files...]', description: 'Archive files into a tarball', example: 'tar -czvf archive.tar.gz dir/\ntar -xzvf archive.tar.gz' },
+      { name: 'gzip', category: 'archive', syntax: 'gzip [options] [file...]', description: 'Compress files with GNU zip', example: 'gzip largefile.txt\ngzip -k file.txt' },
+      { name: 'gunzip', category: 'archive', syntax: 'gunzip [options] [file...]', description: 'Decompress gzipped files', example: 'gunzip archive.gz' },
+      { name: 'zip', category: 'archive', syntax: 'zip [options] zipfile files...', description: 'Package and compress files into a zip archive', example: 'zip -r backup.zip project/' },
+      { name: 'unzip', category: 'archive', syntax: 'unzip [options] zipfile', description: 'Extract files from a zip archive', example: 'unzip archive.zip -d /tmp/extracted' }
+    ];
+
+    let activeCategory = 'all';
+    let searchQuery = '';
+
+    const grid = document.getElementById('grid');
+    const searchInput = document.getElementById('search');
+    const categoriesNav = document.getElementById('categories');
+    const countBadge = document.getElementById('count-badge');
+
+    function renderCategories() {
+      let html = '<button class="cat-btn active" data-cat="all">All</button>';
+      for (const [key, meta] of Object.entries(CATEGORY_META)) {
+        html += `<button class="cat-btn" data-cat="${key}">${meta.label}</button>`;
+      }
+      categoriesNav.innerHTML = html;
+
+      categoriesNav.addEventListener('click', (e) => {
+        const btn = e.target.closest('.cat-btn');
+        if (!btn) return;
+        categoriesNav.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeCategory = btn.dataset.cat;
+        renderCards();
+      });
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function highlightText(text, query) {
+      if (!query) return escapeHtml(text);
+      const escaped = escapeHtml(text);
+      const regex = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+      return escaped.replace(regex, '<mark>$1</mark>');
+    }
+
+    function filterCommands() {
+      let filtered = commands;
+      if (activeCategory !== 'all') {
+        filtered = filtered.filter(c => c.category === activeCategory);
+      }
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        filtered = filtered.filter(c =>
+          c.name.toLowerCase().includes(q) ||
+          c.description.toLowerCase().includes(q) ||
+          c.syntax.toLowerCase().includes(q) ||
+          c.example.toLowerCase().includes(q)
+        );
+      }
+      return filtered;
+    }
+
+    function renderCards() {
+      const filtered = filterCommands();
+      countBadge.textContent = `Showing ${filtered.length} of ${commands.length} commands`;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="no-results">
+            <span>:</span>
+            No commands match your search.
+          </div>`;
+        return;
+      }
+
+      const fragment = document.createDocumentFragment();
+      for (const cmd of filtered) {
+        const catMeta = CATEGORY_META[cmd.category];
+        const article = document.createElement('article');
+        article.className = 'card fade-in';
+        article.dataset.category = cmd.category;
+        article.style.setProperty('--cat-color', catMeta.color);
+
+        const exampleLines = escapeHtml(cmd.example).replace(/\n/g, '<br>');
+
+        article.innerHTML = `
+          <div class="card-titlebar">
+            <span class="dots">
+              <i class="dot"></i>
+              <i class="dot"></i>
+              <i class="dot"></i>
+            </span>
+            <span class="card-category">${catMeta.label}</span>
+          </div>
+          <div class="card-body">
+            <h3 class="cmd-name">${highlightText(cmd.name, searchQuery)}</h3>
+            <p class="cmd-desc">${highlightText(cmd.description, searchQuery)}</p>
+            <div class="cmd-syntax"><span class="prompt">$</span>${highlightText(cmd.syntax, searchQuery)}</div>
+            <div class="cmd-example">
+              <span class="example-label">Example</span>
+              <span class="prompt">$</span>${exampleLines}
+              <button class="copy-btn" data-cmd="${escapeHtml(cmd.example.split('\n')[0])}">Copy</button>
+            </div>
+          </div>`;
+        fragment.appendChild(article);
+      }
+
+      grid.innerHTML = '';
+      grid.appendChild(fragment);
+    }
+
+    let debounceTimer;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        searchQuery = searchInput.value.trim();
+        renderCards();
+      }, 150);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '/' && document.activeElement !== searchInput) {
+        e.preventDefault();
+        searchInput.focus();
+      }
+      if (e.key === 'Escape' && document.activeElement === searchInput) {
+        searchInput.value = '';
+        searchQuery = '';
+        searchInput.blur();
+        renderCards();
+      }
+    });
+
+    grid.addEventListener('click', (e) => {
+      const btn = e.target.closest('.copy-btn');
+      if (!btn) return;
+      const cmd = btn.dataset.cmd;
+      navigator.clipboard.writeText(cmd).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 1500);
+      });
+    });
+
+    renderCategories();
+    renderCards();
+  </script>
+</body>
+</html>
